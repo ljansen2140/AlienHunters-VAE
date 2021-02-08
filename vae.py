@@ -74,15 +74,18 @@ z = Sampling()([z_mean, z_log_var])
 encoder = keras.Model(encoder_inputs, [z_mean, z_log_var, z], name="encoder")
 encoder.summary()
 
+
 """
 ## Build the decoder
 """
 
-latent_inputs = keras.Input(shape=(latent_dim,))
-x = layers.Dense(8 * 8 * 64, activation="relu")(latent_inputs)
-x = layers.Reshape((8, 8, 64))(x)
+## this is our input image
+
+latent_inputs = keras.Input(shape=(latent_dim,)) ## activation function via their string identifier “relu”. ##This is equivalent to ##from tensorflow.keras. import layers ##from tensorflow.keras. import activation ##model.add (layers.Dense (7 * 7 * 64)) ##model.add (layers.activation (activation.relu))
+x = layers.Dense(8 * 8 * 64, activation="relu")(latent_inputs) ## Ue Reshape layers to go to Dense and back to HWC format
+x = layers.Reshape((8, 8, 64))(x) ## build convolutional decoder model using the shape (7, 7, 64) that was earlier saved
 x = layers.Conv2DTranspose(64, 3, activation="relu", strides=2, padding="same")(x)
-x = layers.Conv2DTranspose(32, 3, activation="relu", strides=2, padding="same")(x)
+x = layers.Conv2DTranspose(32, 3, activation="relu", strides=2, padding="same")(x) ## store it in decoder output
 decoder_outputs = layers.Conv2DTranspose(3, 3, activation="sigmoid", padding="same")(x)
 decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
 decoder.summary()
