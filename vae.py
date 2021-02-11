@@ -56,23 +56,34 @@ class Sampling(layers.Layer):
         epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
         return z_mean + tf.exp(0.5 * z_log_var) * epsilon
 
-
 """
 ## Build the encoder
 """
 
-latent_dim = 2
+latent_dim = 2 # Used for layers.Dense(); Refers to the dimension being used  
 
-encoder_inputs = keras.Input(shape=(32, 32, 3))
+# First two number designates the shape size, third number designates the number of channels
+encoder_inputs = keras.Input(shape=(28, 28, 1))
+
+# Conv2D - means to look at images 
+# First number are the filters - the dimensionality of the output space 
+# Second number is the kernel size - specifies the height and the width of the 2D convolution window 
+# Activation: defines the output of the node - multiple types to try out most commonly used is relu (general)
+# Strides: the strides of the convolution along the width and height - tuner for the compression of images
+# Padding: the amount of pixels added to an image - "same" is to pad evenly throughout the input image to generate a same sized output image. 
 x = layers.Conv2D(32, 3, activation="relu", strides=2, padding="same")(encoder_inputs)
 x = layers.Conv2D(64, 3, activation="relu", strides=2, padding="same")(x)
-x = layers.Flatten()(x)
-x = layers.Dense(16, activation="relu")(x)
-z_mean = layers.Dense(latent_dim, name="z_mean")(x)
-z_log_var = layers.Dense(latent_dim, name="z_log_var")(x)
-z = Sampling()([z_mean, z_log_var])
-encoder = keras.Model(encoder_inputs, [z_mean, z_log_var, z], name="encoder")
-encoder.summary()
+
+x = layers.Flatten()(x) # Flatten means to covert to a 1D array - a fully connected layer
+x = layers.Dense(16, activation="relu")(x) # Dense means to connect the the fully connected layer to the neural network.  
+# 16 is the unit which is always a positive integer - it represents the dimensionality of the output space
+
+z_mean = layers.Dense(latent_dim, name="z_mean")(x) # This is calculating the mean of the neural network 
+z_log_var = layers.Dense(latent_dim, name="z_log_var")(x) # This is calculating the variance of the neural network 
+z = Sampling()([z_mean, z_log_var]) # This is run through the Sampling class - Refer to Sampling above 
+encoder = keras.Model(encoder_inputs, [z_mean, z_log_var, z], name="encoder") # Model groups layers into an object with training and inference features
+encoder.summary() # This prints out the summary of the network 
+
 
 
 """
