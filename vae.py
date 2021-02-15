@@ -166,7 +166,7 @@ plt.plot(history.history['reconstruction_loss'])
 plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
+plt.legend(['loss', 'reconstruction loss'], loc='upper left')
 plt.show()
 
 
