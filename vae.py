@@ -15,6 +15,8 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
+import matplotlib.pyplot as plt
+
 
 
 #Data Builder File: ./data_builder.py
@@ -102,6 +104,7 @@ class VAE(keras.Model):
             name="reconstruction_loss"
         )
         self.kl_loss_tracker = keras.metrics.Mean(name="kl_loss")
+        self.reconstructed = []
 
     @property
     def metrics(self):
@@ -123,6 +126,10 @@ class VAE(keras.Model):
             kl_loss = -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
             kl_loss = tf.reduce_mean(tf.reduce_sum(kl_loss, axis=1))
             total_loss = reconstruction_loss + kl_loss
+        
+        #Track current data state
+        self.reconstructed = reconstruction
+
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
         self.total_loss_tracker.update_state(total_loss)
@@ -141,7 +148,7 @@ class VAE(keras.Model):
 
 
 vae = VAE(encoder, decoder)
-vae.compile(optimizer=keras.optimizers.Adam())
+vae.compile(optimizer=keras.optimizers.Adam(), run_eagerly=True)
 
 
 max_epochs = 5
@@ -151,9 +158,9 @@ f = plt.figure(figsize=(2*cols,2*rows))
 f.tight_layout()
 
 for epoch in range(max_epochs):
-    history = vae.fit(pic_data, epochs=1, batch_size=128)
+    history = vae.fit(pic_data, epochs=1)
     f.add_subplot(rows,cols, epoch+1)
-    plt.imshow()  #Something goes between the parentheses, but I can't figure out what
+    #plt.imshow()  #Something goes between the parentheses, but I can't figure out what
 
 plt.savefig("results.png")
 
