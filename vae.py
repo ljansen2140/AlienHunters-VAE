@@ -56,6 +56,13 @@ class Sampling(layers.Layer):
         epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
         return z_mean + tf.exp(0.5 * z_log_var) * epsilon
 
+    
+    
+"""
+def rng():
+    g = tf.random.Generator.from_non_deterministic_state()
+    return g.normal(shape=(5000,2))
+"""
 
 """
 ## Build the encoder
