@@ -58,11 +58,11 @@ class Sampling(layers.Layer):
 
     
     
-"""
-def rng():
+
+def rng(x):
     g = tf.random.Generator.from_non_deterministic_state()
-    return g.normal(shape=(5000,2))
-"""
+    return g.normal(shape=(x,2))
+
 
 """
 ## Build the encoder
