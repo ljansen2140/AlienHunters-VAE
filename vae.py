@@ -104,7 +104,6 @@ class VAE(keras.Model):
             name="reconstruction_loss"
         )
         self.kl_loss_tracker = keras.metrics.Mean(name="kl_loss")
-        self.reconstructed = []
 
     @property
     def metrics(self):
@@ -127,8 +126,6 @@ class VAE(keras.Model):
             kl_loss = tf.reduce_mean(tf.reduce_sum(kl_loss, axis=1))
             total_loss = reconstruction_loss + kl_loss
         
-        #Track current data state
-        self.reconstructed = reconstruction
 
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
@@ -151,16 +148,39 @@ vae = VAE(encoder, decoder)
 vae.compile(optimizer=keras.optimizers.Adam(), run_eagerly=True)
 
 
+
+# Number of epochs to run for
 max_epochs = 5
+
+
+
 rows = 4 # defining no. of rows in figure
 cols = 12 # defining no. of colums in figure
 f = plt.figure(figsize=(2*cols,2*rows)) 
 f.tight_layout()
 
+
+#Select static Sample data ranging [x:y-1]
+sample_data = pic_data[0:1]
+
+
+
 for epoch in range(max_epochs):
     history = vae.fit(pic_data, epochs=1)
-    f.add_subplot(rows,cols, epoch+1)
-    #plt.imshow()  #Something goes between the parentheses, but I can't figure out what
+    #f.add_subplot(rows,cols, epoch+1)
+
+
+    # Simulate Predictions
+    # Run encoder and grab variable [2] (Latent data representation)
+    intermediate = vae.encoder.predict(sample_data)[2]
+    # Run decoder on latent space
+    result = vae.decoder.predict(intermediate)
+
+    # Plot and display result
+    plt.imshow(result[0], cmap=plt.cm.binary)
+    plt.show()
+
+
 
 plt.savefig("results.png")
 
