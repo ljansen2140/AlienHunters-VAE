@@ -207,11 +207,10 @@ for epoch in range(max_epochs):
         plot_step(vae, sample_data, axxar, number_of_pics, plot_iter)
         plot_iter += 1
 
+plt.savefig("results.png")
+
 plt.show()
 
-
-
-plt.savefig("results.png")
 
 
 print(history.history.keys())
