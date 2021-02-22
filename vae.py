@@ -149,9 +149,34 @@ vae.compile(optimizer=keras.optimizers.Adam(), run_eagerly=True)
 
 
 
+# Create Plotter Function
+def plot_step(vae, sample_d, ax, n, plot_i):
+    #Function here
+    # Plot and display result
+
+    # Simulate Predictions
+    # Run encoder and grab variable [2] (Latent data representation)
+    intermediate = vae.encoder.predict(sample_data)[2]
+    # Run decoder on latent space
+    result = vae.decoder.predict(intermediate)
+    for i in range(n):
+        ax[plot_i, i].imshow(result[i], cmap=plt.cm.binary)
+        ax[plot_i,i].axis("off")
+        
+
+    #plt.imshow(result[0], cmap=plt.cm.binary)
+    #plt.show()
+
+
+
+
 # Number of epochs to run for
 max_epochs = 5
 
+
+# Number of Rows to plot
+num_rows_plot = 5
+epoch_plot_step = [i for i in range(0,max_epochs,max_epochs // num_rows_plot)]
 
 
 rows = 4 # defining no. of rows in figure
@@ -161,24 +186,28 @@ f.tight_layout()
 
 
 #Select static Sample data ranging [x:y-1]
-sample_data = pic_data[0:1]
+number_of_pics = 10
+sample_data = pic_data[0:number_of_pics]
 
+# Setup Plot
+# Should have the same number of rows as the sample data length
+f, axxar = plt.subplots(num_rows_plot+1, number_of_pics)
 
+for i in range(number_of_pics):
+    axxar[0,i].imshow(sample_data[i], cmap=plt.cm.binary)
+    axxar[0,i].axis("off")
+#plt.show()
 
+plot_iter = 1
 for epoch in range(max_epochs):
     history = vae.fit(pic_data, epochs=1)
     #f.add_subplot(rows,cols, epoch+1)
 
+    if epoch in epoch_plot_step:
+        plot_step(vae, sample_data, axxar, number_of_pics, plot_iter)
+        plot_iter += 1
 
-    # Simulate Predictions
-    # Run encoder and grab variable [2] (Latent data representation)
-    intermediate = vae.encoder.predict(sample_data)[2]
-    # Run decoder on latent space
-    result = vae.decoder.predict(intermediate)
-
-    # Plot and display result
-    plt.imshow(result[0], cmap=plt.cm.binary)
-    plt.show()
+plt.show()
 
 
 
