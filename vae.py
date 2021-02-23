@@ -62,14 +62,22 @@ class Sampling(layers.Layer):
 """
 ## Build the encoder
 """
-
-latent_dim = 2
+#Final dimensionality space
+latent_dim = 200
+#Dimensional Space right before z_mean and z_log_var
+intermediate_dim = 512
 
 encoder_inputs = keras.Input(shape=(32, 32, 3))
-x = layers.Conv2D(32, 3, activation="relu", strides=2, padding="same")(encoder_inputs)
-x = layers.Conv2D(64, 3, activation="relu", strides=2, padding="same")(x)
-x = layers.Flatten()(x)
-x = layers.Dense(16, activation="relu")(x)
+
+#Conv2d: Convolutional layers
+#x = layers.Conv2D(32, 3, activation="relu", strides=2, padding="same")(encoder_inputs)
+#x = layers.Conv2D(64, 3, activation="relu", strides=2, padding="same")(x)
+
+x = layers.Flatten()(encoder_inputs)
+
+x = layers.Dense(1024, activation="relu")(x)
+
+x = layers.Dense(intermediate_dim, activation="relu")(x)
 z_mean = layers.Dense(latent_dim, name="z_mean")(x)
 z_log_var = layers.Dense(latent_dim, name="z_log_var")(x)
 z = Sampling()([z_mean, z_log_var])
@@ -81,11 +89,18 @@ encoder.summary()
 """
 
 latent_inputs = keras.Input(shape=(latent_dim,))
-x = layers.Dense(8 * 8 * 64, activation="relu")(latent_inputs)
-x = layers.Reshape((8, 8, 64))(x)
-x = layers.Conv2DTranspose(64, 3, activation="relu", strides=2, padding="same")(x)
-x = layers.Conv2DTranspose(32, 3, activation="relu", strides=2, padding="same")(x)
-decoder_outputs = layers.Conv2DTranspose(3, 3, activation="sigmoid", padding="same")(x)
+x = layers.Dense(intermediate_dim, activation="relu")(latent_inputs)
+x = layers.Dense(1024, activation="relu")(x)
+x = layers.Dense(32*32*3, activation="relu")(x)
+
+
+decoder_outputs = layers.Reshape((32, 32, 3))(x)
+
+
+#Conv2d Layers
+#x = layers.Conv2DTranspose(64, 3, activation="relu", strides=2, padding="same")(x)
+#x = layers.Conv2DTranspose(32, 3, activation="relu", strides=2, padding="same")(x)
+#decoder_outputs = layers.Conv2DTranspose(3, 3, activation="sigmoid", padding="same")(x)
 decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
 decoder.summary()
 
